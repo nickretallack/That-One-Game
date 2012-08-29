@@ -201,7 +201,7 @@
       }
       results = _.values(collected);
       if (results.length >= 3) {
-        if (this.combo_meter.fullness > 100) {
+        if (this.combo_meter.combo > 3) {
           for (_i = 0, _len = results.length; _i < _len; _i++) {
             tile = results[_i];
             for (name in cardinals) {
@@ -297,32 +297,44 @@
   Meter = (function() {
 
     function Meter(_arg) {
-      this.element = _arg.element, this.bumps = _arg.bumps, this.drain_rate = _arg.drain_rate;
+      this.element = _arg.element, this.drain_rate = _arg.drain_rate;
       _.bindAll(this);
       this.filling = this.element.find('.filling');
+      this.display = this.element.find('.display');
       this.fullness = 0;
-      this.bump_strength = 100.0 / this.bumps;
+      this.combo = 0;
       this.time = get_time();
       this.drain_some();
     }
 
     Meter.prototype.render = function() {
+      this.display.text(this.combo);
       return this.filling.css({
         width: "" + this.fullness + "%"
       });
     };
 
     Meter.prototype.bump = function() {
-      this.fullness += this.bump_strength;
+      this.combo += 1;
+      this.fullness = 100;
       return this.render();
     };
 
-    Meter.prototype.drain_some = function() {
+    Meter.prototype.delta_time = function() {
       var delta, time;
       time = get_time();
       delta = time - this.time;
       this.time = time;
+      return delta;
+    };
+
+    Meter.prototype.drain_some = function() {
+      var delta;
+      delta = this.delta_time();
       this.fullness = Math.max(this.fullness - this.drain_rate * delta, 0);
+      if (this.fullness === 0) {
+        this.combo = 0;
+      }
       this.render();
       return webkitRequestAnimationFrame(this.drain_some);
     };
@@ -335,8 +347,7 @@
     var combo_meter;
     combo_meter = new Meter({
       element: $('#combo-meter'),
-      bumps: 2,
-      drain_rate: 10.0 / 1000
+      drain_rate: 100.0 / 1000
     });
     return new Board({
       element: $('#game'),

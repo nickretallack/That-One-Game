@@ -113,7 +113,7 @@ class Board
 
         if results.length >= 3
             # spread to a bigger explosion if the meter is full
-            if @combo_meter.fullness > 100
+            if @combo_meter.combo > 3
                 for tile in results
                     for name, vector of cardinals
                         position = current_tile.position.add vector
@@ -178,35 +178,44 @@ class Board
 get_time = -> new Date().getTime()
 
 class Meter
-    constructor: ({@element, @bumps, @drain_rate}) ->
+    constructor: ({@element, @drain_rate}) ->
         _.bindAll @
         @filling = @element.find '.filling'
+        @display = @element.find '.display'
         @fullness = 0
-        @bump_strength = 100.0 / @bumps
+        @combo = 0
+        #@bump_strength = 100.0 / @bumps
         @time = get_time()
         @drain_some()
 
     render: ->
+        @display.text @combo
         @filling.css
             width:"#{@fullness}%"
 
     bump: ->
-        @fullness += @bump_strength
+        @combo += 1
+        @fullness = 100
         @render()
 
-    drain_some: ->
+    delta_time: ->
         time = get_time()
         delta = time - @time
         @time = time
+        delta
+
+    drain_some: ->
+        delta = @delta_time()
         @fullness = Math.max @fullness - @drain_rate * delta, 0
+        if @fullness is 0
+            @combo = 0
         @render()
         webkitRequestAnimationFrame @drain_some
 
 $ ->
     combo_meter = new Meter
         element:$ '#combo-meter'
-        bumps:2
-        drain_rate:10.0/1000
+        drain_rate:100.0/1000
     new Board
         element:$ '#game'
         size:V 10,9
