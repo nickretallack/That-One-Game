@@ -76,6 +76,15 @@
       this.element.on('click', this.clicked);
     }
 
+    Tile.prototype.move = function(position) {
+      this.position = position;
+      return this.re_position();
+    };
+
+    Tile.prototype.remove = function() {
+      return this.element.remove();
+    };
+
     Tile.prototype.re_position = function() {
       return this.element.css(this.position.scale(tile_size).css_position());
     };
@@ -91,25 +100,42 @@
   Board = (function() {
 
     function Board(_arg) {
-      var tile, x, y, _i, _j, _ref, _ref1;
+      var _this = this;
       this.element = _arg.element;
       this.element.css(tile_count.scale(tile_size).css_size());
       this.tiles = {};
-      for (x = _i = 0, _ref = tile_count.x; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
-        for (y = _j = 0, _ref1 = tile_count.y; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
-          tile = new Tile({
-            position: V(x, y),
-            board: this,
-            type: random_choice(tile_types)
-          });
-          this.register_tile(tile);
-          this.element.append(tile.element);
-        }
-      }
+      this.iterate_positions(function(position) {
+        var tile;
+        tile = new Tile({
+          position: position,
+          board: _this,
+          type: random_choice(tile_types)
+        });
+        _this.register_tile(tile);
+        return _this.element.append(tile.element);
+      });
     }
 
+    Board.prototype.iterate_positions = function(callback) {
+      "Iterates from bottom to top.  Useful for applying gravity";
+
+      var x, y, _i, _ref, _results;
+      _results = [];
+      for (y = _i = 0, _ref = tile_count.y; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
+        _results.push((function() {
+          var _j, _ref1, _results1;
+          _results1 = [];
+          for (x = _j = 0, _ref1 = tile_count.x; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
+            _results1.push(callback(V(x, y)));
+          }
+          return _results1;
+        })());
+      }
+      return _results;
+    };
+
     Board.prototype.get_tile = function(position) {
-      return this.tiles[tile.position.hash_key()];
+      return this.tiles[position.hash_key()];
     };
 
     Board.prototype.register_tile = function(tile) {
@@ -121,13 +147,13 @@
     };
 
     Board.prototype.move_tile = function(tile, position) {
-      unregister_tile(tile);
-      tile.position = position;
-      return register_tile(tile);
+      this.unregister_tile(tile);
+      tile.move(position);
+      return this.register_tile(tile);
     };
 
     Board.prototype.find_contiguous = function(start_tile) {
-      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len, _results;
+      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len;
       collected = {};
       collected[start_tile.position.hash_key()] = start_tile;
       work_queue = [start_tile];
@@ -147,12 +173,72 @@
         }
       }
       results = _.values(collected);
+      if (results.length >= 3) {
+        for (_i = 0, _len = results.length; _i < _len; _i++) {
+          tile = results[_i];
+          this.unregister_tile(tile);
+          tile.remove();
+        }
+        return this.fall();
+      }
+    };
+
+    Board.prototype.fall_column = function(x) {
+      var group, groups, is_tile, offset, tile, _i, _len, _results;
+      groups = this.group_column(x);
+      offset = 0;
       _results = [];
-      for (_i = 0, _len = results.length; _i < _len; _i++) {
-        tile = results[_i];
-        _results.push(tile.element.css({
-          background: 'green'
-        }));
+      for (_i = 0, _len = groups.length; _i < _len; _i++) {
+        group = groups[_i];
+        is_tile = group[0] != null;
+        if (is_tile) {
+          if (offset > 0) {
+            _results.push((function() {
+              var _j, _len1, _results1;
+              _results1 = [];
+              for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
+                tile = group[_j];
+                _results1.push(this.move_tile(tile, tile.position.add(V(0, -offset))));
+              }
+              return _results1;
+            }).call(this));
+          } else {
+            _results.push(void 0);
+          }
+        } else {
+          _results.push(offset += group.length);
+        }
+      }
+      return _results;
+    };
+
+    Board.prototype.group_column = function(x) {
+      var collecting_tiles, current_group, groups, is_tile, position, tile, y, _i, _ref;
+      current_group = [];
+      groups = [current_group];
+      collecting_tiles = null;
+      for (y = _i = 0, _ref = tile_count.y; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
+        position = V(x, y);
+        tile = this.get_tile(position);
+        is_tile = tile != null;
+        if (collecting_tiles == null) {
+          collecting_tiles = is_tile;
+        }
+        if (collecting_tiles !== is_tile) {
+          current_group = [];
+          groups.push(current_group);
+          collecting_tiles = is_tile;
+        }
+        current_group.push(tile);
+      }
+      return groups;
+    };
+
+    Board.prototype.fall = function() {
+      var x, _i, _ref, _results;
+      _results = [];
+      for (x = _i = 0, _ref = tile_count.x; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.fall_column(x));
       }
       return _results;
     };

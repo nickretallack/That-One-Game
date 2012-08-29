@@ -36,6 +36,12 @@ class Tile
         @re_position()
         @element.on 'click', @clicked
 
+    move: (@position) ->
+        @re_position()
+
+    remove: ->
+        @element.remove()
+
     re_position: ->
         @element.css @position.scale(tile_size).css_position()
 
@@ -46,17 +52,22 @@ class Board
     constructor:({@element}) ->
         @element.css tile_count.scale(tile_size).css_size()
         @tiles = {}
-        for x in [0...tile_count.x]
-            for y in [0...tile_count.y]
-                tile = new Tile
-                    position:V(x,y)
-                    board:@
-                    type:random_choice tile_types
-                @register_tile tile
-                @element.append tile.element
+        @iterate_positions (position) =>
+            tile = new Tile
+                position:position
+                board:@
+                type:random_choice tile_types
+            @register_tile tile
+            @element.append tile.element
+
+    iterate_positions: (callback) ->
+        """Iterates from bottom to top.  Useful for applying gravity"""
+        for y in [0...tile_count.y]
+            for x in [0...tile_count.x]
+                callback V(x,y)        
 
     get_tile: (position) ->
-        @tiles[tile.position.hash_key()]
+        @tiles[position.hash_key()]
 
     register_tile: (tile) ->
         @tiles[tile.position.hash_key()] = tile
@@ -65,9 +76,9 @@ class Board
         delete @tiles[tile.position.hash_key()]
 
     move_tile: (tile, position) ->
-        unregister_tile tile
-        tile.position = position
-        register_tile tile
+        @unregister_tile tile
+        tile.move position
+        @register_tile tile
 
     find_contiguous: (start_tile) ->
         collected = {}
@@ -84,9 +95,49 @@ class Board
                         collected[hash_key] = found_tile
                         work_queue.push found_tile
         results = _.values collected
-        for tile in results
-            tile.element.css
-                background:'green'
+        if results.length >= 3
+            for tile in results
+                @unregister_tile tile
+                tile.remove()
+            @fall()
+
+    fall_column: (x) ->
+        # Rows are isolated, so we can make them fall one at a time
+        groups = @group_column x
+        offset = 0
+        for group in groups
+            is_tile = group[0]?
+            if is_tile
+                if offset > 0
+                    for tile in group
+                        @move_tile tile, tile.position.add V(0,-offset)
+            else
+                offset += group.length
+
+
+
+    group_column: (x) ->
+        current_group = []
+        groups = [current_group]
+        collecting_tiles = null
+        for y in [0...tile_count.y]
+            position = V(x,y)
+            tile = @get_tile position
+            is_tile = tile?
+            collecting_tiles ?= is_tile
+            if collecting_tiles != is_tile
+                # We were collecting tiles and found a space,
+                # or we were collecting spaces and found a tile
+                # Start a new group.
+                current_group = []
+                groups.push current_group
+                collecting_tiles = is_tile
+            current_group.push tile
+        groups
+
+    fall: ->
+        for x in [0...tile_count.x]
+            @fall_column x
 
 
 $ ->
