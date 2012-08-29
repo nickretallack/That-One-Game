@@ -67,6 +67,8 @@ class Board
     constructor:({@element, @size, @combo_meter}) ->
         @element.css @size.scale(tile_size).css_size()
         @tiles = {}
+        @breaks = 0
+        @broken_tiles = 0
         @iterate_positions (position) =>
             tile = @make_tile position
             @register_tile tile
@@ -133,6 +135,8 @@ class Board
                 results = _.values collected
 
             @combo_meter.bump()
+            @breaks += 1
+            @broken_tiles += results.length
             for tile in results
                 @unregister_tile tile
                 tile.remove()
@@ -203,6 +207,7 @@ class Meter extends Animated
         @display = @element.find '.display'
         @fullness = 0
         @combo = 0
+        @max_combo = 0
         @animate()
 
     render: ->
@@ -212,6 +217,7 @@ class Meter extends Animated
 
     bump: ->
         @combo += 1
+        @max_combo = Math.max @max_combo, @combo
         @fullness = 100
         @render()
 
@@ -264,6 +270,11 @@ class Game
 
     end_game: ->
         @board.freeze()
+        @element.append """
+            <p>Tiles Broken: #{@board.broken_tiles}</p>
+            <p>Successful Breaks: #{@board.breaks}</p>
+            <p>Max Combo: #{@combo_meter.max_combo}</p>
+        """
 
 $ ->
     $('#new-game').on 'click', ->    

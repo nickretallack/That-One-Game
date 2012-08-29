@@ -132,6 +132,8 @@
       this.element = _arg.element, this.size = _arg.size, this.combo_meter = _arg.combo_meter;
       this.element.css(this.size.scale(tile_size).css_size());
       this.tiles = {};
+      this.breaks = 0;
+      this.broken_tiles = 0;
       this.iterate_positions(function(position) {
         var tile;
         tile = _this.make_tile(position);
@@ -233,6 +235,8 @@
           results = _.values(collected);
         }
         this.combo_meter.bump();
+        this.breaks += 1;
+        this.broken_tiles += results.length;
         for (_j = 0, _len1 = results.length; _j < _len1; _j++) {
           tile = results[_j];
           this.unregister_tile(tile);
@@ -340,6 +344,7 @@
       this.display = this.element.find('.display');
       this.fullness = 0;
       this.combo = 0;
+      this.max_combo = 0;
       this.animate();
     }
 
@@ -352,6 +357,7 @@
 
     Meter.prototype.bump = function() {
       this.combo += 1;
+      this.max_combo = Math.max(this.max_combo, this.combo);
       this.fullness = 100;
       return this.render();
     };
@@ -422,7 +428,8 @@
     }
 
     Game.prototype.end_game = function() {
-      return this.board.freeze();
+      this.board.freeze();
+      return this.element.append("<p>Tiles Broken: " + this.board.broken_tiles + "</p>\n<p>Successful Breaks: " + this.board.breaks + "</p>\n<p>Max Combo: " + this.combo_meter.max_combo + "</p>");
     };
 
     return Game;
