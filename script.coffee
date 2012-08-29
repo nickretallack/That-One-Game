@@ -21,11 +21,6 @@ cardinals =
 
 delay = (milliseconds, procedure) -> setTimeout procedure, milliseconds
 
-tile_size = 40
-tile_types = "red green blue yellow orange".split ' '
-#tile_types = "burger hotdog pizza icecream banana ".split ' '
-fall_speed = 0.1
-
 random_choice = (choices) ->
     index = Math.floor(Math.random() * choices.length) % choices.length
     choices[index]
@@ -35,7 +30,7 @@ class Tile
         _.bindAll @
         @element = $ """<div class="positioned tile #{@type}"></div>"""
         @element.css 'background-color':@type
-        @element.css V(tile_size, tile_size).css_size()
+        @element.css V(@board.tile_size, @board.tile_size).css_size()
         @re_position()
         @element.on 'click', @clicked
 
@@ -45,7 +40,7 @@ class Tile
 
     move: (position) ->
         distance = @position.y - position.y
-        fall_duration = distance * fall_speed
+        fall_duration = distance * @board.fall_speed
         @element.css
             '-webkit-transition':"bottom #{fall_duration}s linear"
         @position = position
@@ -58,14 +53,21 @@ class Tile
 
 
     re_position: ->
-        @element.css @position.scale(tile_size).css_position()
+        @element.css @position.scale(@board.tile_size).css_position()
 
     clicked: ->
         @board.find_contiguous @
 
 class Board
-    constructor:({@element, @size, @combo_meter}) ->
-        @element.css @size.scale(tile_size).css_size()
+    constructor:({@element, @size, @combo_meter, @minimum_break, @tile_size, @fall_speed}) ->
+        @tile_types ?= "red green blue yellow orange".split ' '
+        @size ?= V 10,9 # number of tiles in the board
+        @tile_size = 40
+        @minimum_break ?= 3
+        @fall_speed = 0.1
+
+        @element.css @size.scale(@tile_size).css_size()
+
         @tiles = {}
         @breaks = 0
         @broken_tiles = 0
@@ -77,7 +79,7 @@ class Board
         tile = new Tile
             position:position
             board:@
-            type:random_choice tile_types
+            type:random_choice @tile_types
         @element.append tile.element
         tile
 
@@ -122,9 +124,9 @@ class Board
                         work_queue.push found_tile
         results = _.values collected
 
-        if results.length >= 3
+        if results.length >= @minimum_break
             # spread to a bigger explosion if the meter is full
-            if @combo_meter.combo > 5
+            if @combo_meter.at_goal()
                 for tile in results
                     for name, vector of cardinals
                         position = current_tile.position.add vector
@@ -200,11 +202,15 @@ class Animated
         delta
 
 class Meter extends Animated
-    constructor: ({@element, @drain_rate}) ->
+    constructor: ({@element, @drain_rate, @goal}) ->
         super()
         _.bindAll @
         @filling = @element.find '.filling'
         @display = @element.find '.display'
+
+        @goal ?= 5
+        @drain_rate ?= 100.0/1000 # how fast combos have to be
+
         @fullness = 0
         @combo = 0
         @max_combo = 0
@@ -221,6 +227,9 @@ class Meter extends Animated
         @fullness = 100
         @render()
 
+    at_goal: ->
+        @combo >= @goal
+
     animate: ->
         delta = @delta_time()
         @fullness = Math.max @fullness - @drain_rate * delta, 0
@@ -233,6 +242,7 @@ class Timer extends Animated
     constructor:({@element, @time_limit, @callback}) ->
         super()
         _.bindAll @
+        @time_limit ?= 60
         @time_remaining = @time_limit * 1000
         @animate()
 
@@ -245,13 +255,8 @@ class Timer extends Animated
             webkitRequestAnimationFrame @animate
 
 class Game
-    constructor: ({@element, @size, @time_limit, @drain_rate}) ->
+    constructor: ({@element, @size, @time_limit, @combo_drain_rate, @combo_goal, @minimum_break, @tile_types, @tile_size, @tile_fall_speed}) ->
         _.bindAll @
-
-        # Default settings
-        @time_limit ?= 60
-        @size ?= V 10,9 # number of tiles in the board
-        @drain_rate ?= 100.0/1000 # how fast combos have to be
 
         template = """
             <div id="timer" class="timer"></div>
@@ -268,11 +273,16 @@ class Game
             callback:@end_game
         @combo_meter = new Meter
             element:@element.find '#combo-meter'
-            drain_rate:@drain_rate
+            drain_rate:@combo_drain_rate
+            goal:@combo_goal
         @board = new Board
             element:@element.find '#board'
             size:@size
             combo_meter:@combo_meter
+            minimum_break:@minimum_break
+            tile_types:@tile_types
+            tile_size:@tile_size
+            fall_speed:@tile_fall_speed
 
     end_game: ->
         @board.freeze()
