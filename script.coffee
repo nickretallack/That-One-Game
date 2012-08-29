@@ -19,6 +19,8 @@ cardinals =
     up:V(0,1)
     down:V(0,-1)
 
+delay = (milliseconds, procedure) -> setTimeout procedure, milliseconds
+
 tile_size = 40
 tile_types = "red green blue yellow orange".split ' '
 #tile_types = "burger hotdog pizza icecream banana ".split ' '
@@ -46,7 +48,10 @@ class Tile
         setTimeout @re_position
 
     remove: ->
-        @element.remove()
+        @element.css '-webkit-transition':"opacity 0.5s"
+        setTimeout => @element.css opacity:0
+        delay 500, => @element.remove()
+
 
     re_position: ->
         @element.css @position.scale(tile_size).css_position()
