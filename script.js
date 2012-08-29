@@ -201,7 +201,7 @@
       }
       results = _.values(collected);
       if (results.length >= 3) {
-        if (this.combo_meter.combo > 3) {
+        if (this.combo_meter.combo > 5) {
           for (_i = 0, _len = results.length; _i < _len; _i++) {
             tile = results[_i];
             for (name in cardinals) {

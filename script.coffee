@@ -113,7 +113,7 @@ class Board
 
         if results.length >= 3
             # spread to a bigger explosion if the meter is full
-            if @combo_meter.combo > 3
+            if @combo_meter.combo > 5
                 for tile in results
                     for name, vector of cardinals
                         position = current_tile.position.add vector
