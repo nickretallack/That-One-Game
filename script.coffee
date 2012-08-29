@@ -44,12 +44,12 @@ class Tile
         @element.css
             '-webkit-transition':"bottom #{fall_duration}s linear"
         @position = position
-        setTimeout @re_position
+        delay @board.break_delay, @re_position
 
     remove: ->
-        @element.css '-webkit-transition':"opacity 0.5s"
+        @element.css '-webkit-transition':"opacity #{@board.break_delay/1000}s"
         setTimeout => @element.css opacity:0
-        delay 500, => @element.remove()
+        delay @board.break_delay, => @element.remove()
 
 
     re_position: ->
@@ -64,7 +64,7 @@ class Board
         @size ?= V 10,9 # number of tiles in the board
         @tile_size = 40
         @minimum_break ?= 3
-        @fall_speed = 0.1
+        @fall_speed = 0.05
 
         @element.css @size.scale(@tile_size).css_size()
 
@@ -72,6 +72,7 @@ class Board
         @breaks = 0
         @broken_tiles = 0
         @biggest_break = 0
+        @break_delay = 200
 
         @iterate_positions (position) =>
             tile = @make_tile position

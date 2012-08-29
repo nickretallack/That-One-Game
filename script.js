@@ -89,20 +89,20 @@
         '-webkit-transition': "bottom " + fall_duration + "s linear"
       });
       this.position = position;
-      return setTimeout(this.re_position);
+      return delay(this.board.break_delay, this.re_position);
     };
 
     Tile.prototype.remove = function() {
       var _this = this;
       this.element.css({
-        '-webkit-transition': "opacity 0.5s"
+        '-webkit-transition': "opacity " + (this.board.break_delay / 1000) + "s"
       });
       setTimeout(function() {
         return _this.element.css({
           opacity: 0
         });
       });
-      return delay(500, function() {
+      return delay(this.board.break_delay, function() {
         return _this.element.remove();
       });
     };
@@ -135,12 +135,13 @@
       if ((_ref2 = this.minimum_break) == null) {
         this.minimum_break = 3;
       }
-      this.fall_speed = 0.1;
+      this.fall_speed = 0.05;
       this.element.css(this.size.scale(this.tile_size).css_size());
       this.tiles = {};
       this.breaks = 0;
       this.broken_tiles = 0;
       this.biggest_break = 0;
+      this.break_delay = 200;
       this.iterate_positions(function(position) {
         var tile;
         tile = _this.make_tile(position);
