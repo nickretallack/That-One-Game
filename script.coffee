@@ -36,7 +36,7 @@ class Tile
         @element.on 'click', @clicked
 
     move: (@position) ->
-        @re_position()
+        setTimeout @re_position
 
     remove: ->
         @element.remove()
@@ -54,13 +54,14 @@ class Board
         @iterate_positions (position) =>
             tile = @make_tile position
             @register_tile tile
-            @element.append tile.element
 
     make_tile: (position) ->
-        new Tile
+        tile = new Tile
             position:position
             board:@
             type:random_choice tile_types
+        @element.append tile.element
+        tile
 
     iterate_positions: (callback) ->
         """Iterates from bottom to top.  Useful for applying gravity"""
@@ -116,13 +117,16 @@ class Board
             else
                 offset += group.length
 
-        ###
-        for topx in [0...offset]
-            position = 
-            tile = @make_tile V(0,0)
-            tile.move 
-        ###
+        for top_y in [offset...0]
+            # Create the tiles where they would be above the board,
+            # then make them slide into place
+            position = V(x, @size.y - top_y)
+            start_position = position.add V(0,offset)
 
+            tile = @make_tile start_position
+            tile.move position
+            @register_tile tile
+            console.log tile, JSON.stringify(start_position), JSON.stringify(position)
 
     group_column: (x) ->
         current_group = []

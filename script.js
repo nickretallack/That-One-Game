@@ -76,7 +76,7 @@
 
     Tile.prototype.move = function(position) {
       this.position = position;
-      return this.re_position();
+      return setTimeout(this.re_position);
     };
 
     Tile.prototype.remove = function() {
@@ -105,17 +105,19 @@
       this.iterate_positions(function(position) {
         var tile;
         tile = _this.make_tile(position);
-        _this.register_tile(tile);
-        return _this.element.append(tile.element);
+        return _this.register_tile(tile);
       });
     }
 
     Board.prototype.make_tile = function(position) {
-      return new Tile({
+      var tile;
+      tile = new Tile({
         position: position,
         board: this,
         type: random_choice(tile_types)
       });
+      this.element.append(tile.element);
+      return tile;
     };
 
     Board.prototype.iterate_positions = function(callback) {
@@ -186,39 +188,33 @@
     };
 
     Board.prototype.fall_column = function(x) {
-      var group, groups, is_tile, offset, tile, _i, _len, _results;
+      var group, groups, is_tile, offset, position, start_position, tile, top_y, _i, _j, _k, _len, _len1, _results;
       groups = this.group_column(x);
       offset = 0;
-      _results = [];
       for (_i = 0, _len = groups.length; _i < _len; _i++) {
         group = groups[_i];
         is_tile = group[0] != null;
         if (is_tile) {
           if (offset > 0) {
-            _results.push((function() {
-              var _j, _len1, _results1;
-              _results1 = [];
-              for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
-                tile = group[_j];
-                _results1.push(this.move_tile(tile, tile.position.add(V(0, -offset))));
-              }
-              return _results1;
-            }).call(this));
-          } else {
-            _results.push(void 0);
+            for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
+              tile = group[_j];
+              this.move_tile(tile, tile.position.add(V(0, -offset)));
+            }
           }
         } else {
-          _results.push(offset += group.length);
+          offset += group.length;
         }
       }
+      _results = [];
+      for (top_y = _k = offset; offset <= 0 ? _k < 0 : _k > 0; top_y = offset <= 0 ? ++_k : --_k) {
+        position = V(x, this.size.y - top_y);
+        start_position = position.add(V(0, offset));
+        tile = this.make_tile(start_position);
+        tile.move(position);
+        this.register_tile(tile);
+        _results.push(console.log(tile, JSON.stringify(start_position), JSON.stringify(position)));
+      }
       return _results;
-      /*
-              for topx in [0...offset]
-                  position = 
-                  tile = @make_tile V(0,0)
-                  tile.move
-      */
-
     };
 
     Board.prototype.group_column = function(x) {
