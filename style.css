@@ -1,3 +1,8 @@
+html {
+    font-family:helvetica;
+    text-align:center;
+}
+
 .tile {
     position:absolute;
     -webkit-border-radius:50%;
@@ -5,7 +10,7 @@
 .tile.burger {background:orange;}
 .tile.hotdog {background:red;}
 .tile.pizza {background:yellow;}
-#game {
+.board {
     position:relative;
     margin:auto;
     overflow:hidden;
@@ -41,6 +46,16 @@
 }
 
 .timer {
-    font-size:20px;
+    font-size:28px;
     text-align:center;
+    margin:20px;
+}
+
+.button {
+    background:gray;
+    border-radius:5px;
+    padding:4px 8px;
+    color:white;
+    cursor:pointer;
+    display:inline-block;
 }

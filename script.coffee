@@ -39,6 +39,10 @@ class Tile
         @re_position()
         @element.on 'click', @clicked
 
+    freeze: ->
+        @element.off 'click', @clicked
+        console.log "unbound"
+
     move: (position) ->
         distance = @position.y - position.y
         fall_duration = distance * fall_speed
@@ -80,6 +84,11 @@ class Board
         for y in [0...@size.y]
             for x in [0...@size.x]
                 callback V(x,y)        
+
+    freeze: ->
+        @iterate_positions (position) =>
+            tile = @get_tile position
+            tile.freeze()            
 
     get_tile: (position) ->
         @tiles[position.hash_key()]
@@ -215,7 +224,7 @@ class Meter extends Animated
         webkitRequestAnimationFrame @animate
 
 class Timer extends Animated
-    constructor:({@element, @time_limit}) ->
+    constructor:({@element, @time_limit, @callback}) ->
         super()
         _.bindAll @
         @time_remaining = @time_limit * 1000
@@ -223,17 +232,40 @@ class Timer extends Animated
 
     animate: ->
         @time_remaining -= @delta_time()
-        @element.text Math.ceil @time_remaining/1000.0
-        webkitRequestAnimationFrame @animate
+        @element.text Math.max 0, Math.ceil @time_remaining/1000.0
+        if @time_remaining <= 0
+            @callback()
+        else
+            webkitRequestAnimationFrame @animate
+
+class Game
+    constructor: ({@element}) ->
+        _.bindAll @
+        template = """
+            <div id="timer" class="timer"></div>
+            <div id="combo-meter" class="meter">
+                <div class="filling"></div>
+                <div class="display"></div>
+            </div>
+            <div id="board" class="board"></div>
+        """
+        @element.html template
+        @timer = new Timer
+            element:@element.find '#timer'
+            time_limit:60
+            callback:@end_game
+        @combo_meter = new Meter
+            element:@element.find '#combo-meter'
+            drain_rate:100.0/1000
+        @board = new Board
+            element:@element.find '#board'
+            size:V 10,9
+            combo_meter:@combo_meter
+
+    end_game: ->
+        @board.freeze()
 
 $ ->
-    timer = new Timer
-        element:$ '#timer'
-        time_limit:60
-    combo_meter = new Meter
-        element:$ '#combo-meter'
-        drain_rate:100.0/1000
-    new Board
-        element:$ '#game'
-        size:V 10,9
-        combo_meter:combo_meter
+    $('#new-game').on 'click', ->    
+        new Game
+            element:$ '#game'
