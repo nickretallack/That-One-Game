@@ -21,6 +21,7 @@ cardinals =
 
 tile_size = 40
 tile_types = "burger hotdog pizza".split ' '
+fall_speed = 0.1
 
 random_choice = (choices) ->
     index = Math.floor(Math.random() * choices.length) % choices.length
@@ -35,7 +36,12 @@ class Tile
         @re_position()
         @element.on 'click', @clicked
 
-    move: (@position) ->
+    move: (position) ->
+        distance = @position.y - position.y
+        fall_duration = distance * fall_speed
+        @element.css
+            '-webkit-transition':"bottom #{fall_duration}s linear"
+        @position = position
         setTimeout @re_position
 
     remove: ->
@@ -126,7 +132,6 @@ class Board
             tile = @make_tile start_position
             tile.move position
             @register_tile tile
-            console.log tile, JSON.stringify(start_position), JSON.stringify(position)
 
     group_column: (x) ->
         current_group = []

@@ -2,17 +2,11 @@
     position:absolute;
 }
 
-.tile {
-    -webkit-transition:bottom 0.5s;
-}
-
 .tile.burger {background:orange;}
 .tile.hotdog {background:red;}
 .tile.pizza {background:yellow;}
-
-
-
 #game {
     position:relative;
     margin:auto;
+    overflow:hidden;
 }
