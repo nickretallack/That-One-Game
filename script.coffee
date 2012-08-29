@@ -71,6 +71,7 @@ class Board
 
     find_contiguous: (start_tile) ->
         collected = {}
+        collected[start_tile.position.hash_key()] = start_tile
         work_queue = [start_tile]
         while work_queue.length
             current_tile = work_queue.pop()

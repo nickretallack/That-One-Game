@@ -129,6 +129,7 @@
     Board.prototype.find_contiguous = function(start_tile) {
       var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len, _results;
       collected = {};
+      collected[start_tile.position.hash_key()] = start_tile;
       work_queue = [start_tile];
       while (work_queue.length) {
         current_tile = work_queue.pop();
