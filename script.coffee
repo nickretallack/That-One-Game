@@ -20,7 +20,6 @@ cardinals =
     down:V(0,-1)
 
 tile_size = 40
-tile_count = V 10,9
 tile_types = "burger hotdog pizza".split ' '
 
 random_choice = (choices) ->
@@ -49,21 +48,24 @@ class Tile
         @board.find_contiguous @
 
 class Board
-    constructor:({@element}) ->
-        @element.css tile_count.scale(tile_size).css_size()
+    constructor:({@element, @size}) ->
+        @element.css @size.scale(tile_size).css_size()
         @tiles = {}
         @iterate_positions (position) =>
-            tile = new Tile
-                position:position
-                board:@
-                type:random_choice tile_types
+            tile = @make_tile position
             @register_tile tile
             @element.append tile.element
 
+    make_tile: (position) ->
+        new Tile
+            position:position
+            board:@
+            type:random_choice tile_types
+
     iterate_positions: (callback) ->
         """Iterates from bottom to top.  Useful for applying gravity"""
-        for y in [0...tile_count.y]
-            for x in [0...tile_count.x]
+        for y in [0...@size.y]
+            for x in [0...@size.x]
                 callback V(x,y)        
 
     get_tile: (position) ->
@@ -114,13 +116,19 @@ class Board
             else
                 offset += group.length
 
+        ###
+        for topx in [0...offset]
+            position = 
+            tile = @make_tile V(0,0)
+            tile.move 
+        ###
 
 
     group_column: (x) ->
         current_group = []
         groups = [current_group]
         collecting_tiles = null
-        for y in [0...tile_count.y]
+        for y in [0...@size.y]
             position = V(x,y)
             tile = @get_tile position
             is_tile = tile?
@@ -136,10 +144,11 @@ class Board
         groups
 
     fall: ->
-        for x in [0...tile_count.x]
+        for x in [0...@size.x]
             @fall_column x
 
 
 $ ->
     new Board
         element:$ '#game'
+        size:V 10,9
