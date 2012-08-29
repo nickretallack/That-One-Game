@@ -177,16 +177,24 @@ class Board
 
 get_time = -> new Date().getTime()
 
-class Meter
+class Animated
+    constructor: ->
+        @time = get_time()
+    delta_time: ->
+        time = get_time()
+        delta = time - @time
+        @time = time
+        delta
+
+class Meter extends Animated
     constructor: ({@element, @drain_rate}) ->
+        super()
         _.bindAll @
         @filling = @element.find '.filling'
         @display = @element.find '.display'
         @fullness = 0
         @combo = 0
-        #@bump_strength = 100.0 / @bumps
-        @time = get_time()
-        @drain_some()
+        @animate()
 
     render: ->
         @display.text @combo
@@ -198,21 +206,30 @@ class Meter
         @fullness = 100
         @render()
 
-    delta_time: ->
-        time = get_time()
-        delta = time - @time
-        @time = time
-        delta
-
-    drain_some: ->
+    animate: ->
         delta = @delta_time()
         @fullness = Math.max @fullness - @drain_rate * delta, 0
         if @fullness is 0
             @combo = 0
         @render()
-        webkitRequestAnimationFrame @drain_some
+        webkitRequestAnimationFrame @animate
+
+class Timer extends Animated
+    constructor:({@element, @time_limit}) ->
+        super()
+        _.bindAll @
+        @time_remaining = @time_limit * 1000
+        @animate()
+
+    animate: ->
+        @time_remaining -= @delta_time()
+        @element.text Math.ceil @time_remaining/1000.0
+        webkitRequestAnimationFrame @animate
 
 $ ->
+    timer = new Timer
+        element:$ '#timer'
+        time_limit:60
     combo_meter = new Meter
         element:$ '#combo-meter'
         drain_rate:100.0/1000
