@@ -105,7 +105,19 @@ class Board
                         collected[hash_key] = found_tile
                         work_queue.push found_tile
         results = _.values collected
+
         if results.length >= 3
+            # spread to a bigger explosion if the meter is full
+            if @combo_meter.fullness > 100
+                for tile in results
+                    for name, vector of cardinals
+                        position = current_tile.position.add vector
+                        hash_key = position.hash_key()
+                        if hash_key not of collected and hash_key of @tiles
+                            found_tile = @tiles[hash_key]
+                            collected[hash_key] = found_tile
+                results = _.values collected
+
             @combo_meter.bump()
             for tile in results
                 @unregister_tile tile
@@ -188,7 +200,7 @@ class Meter
 $ ->
     combo_meter = new Meter
         element:$ '#combo-meter'
-        bumps:5
+        bumps:2
         drain_rate:10.0/1000
     new Board
         element:$ '#game'

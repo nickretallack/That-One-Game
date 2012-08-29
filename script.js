@@ -165,7 +165,7 @@
     };
 
     Board.prototype.find_contiguous = function(start_tile) {
-      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len;
+      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _j, _len, _len1;
       collected = {};
       collected[start_tile.position.hash_key()] = start_tile;
       work_queue = [start_tile];
@@ -186,9 +186,24 @@
       }
       results = _.values(collected);
       if (results.length >= 3) {
+        if (this.combo_meter.fullness > 100) {
+          for (_i = 0, _len = results.length; _i < _len; _i++) {
+            tile = results[_i];
+            for (name in cardinals) {
+              vector = cardinals[name];
+              position = current_tile.position.add(vector);
+              hash_key = position.hash_key();
+              if (!(hash_key in collected) && hash_key in this.tiles) {
+                found_tile = this.tiles[hash_key];
+                collected[hash_key] = found_tile;
+              }
+            }
+          }
+          results = _.values(collected);
+        }
         this.combo_meter.bump();
-        for (_i = 0, _len = results.length; _i < _len; _i++) {
-          tile = results[_i];
+        for (_j = 0, _len1 = results.length; _j < _len1; _j++) {
+          tile = results[_j];
           this.unregister_tile(tile);
           tile.remove();
         }
@@ -305,7 +320,7 @@
     var combo_meter;
     combo_meter = new Meter({
       element: $('#combo-meter'),
-      bumps: 5,
+      bumps: 2,
       drain_rate: 10.0 / 1000
     });
     return new Board({
