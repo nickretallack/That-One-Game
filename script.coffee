@@ -71,6 +71,8 @@ class Board
         @tiles = {}
         @breaks = 0
         @broken_tiles = 0
+        @biggest_break = 0
+
         @iterate_positions (position) =>
             tile = @make_tile position
             @register_tile tile
@@ -139,6 +141,7 @@ class Board
             @combo_meter.bump()
             @breaks += 1
             @broken_tiles += results.length
+            @biggest_break = Math.max @biggest_break, results.length
             for tile in results
                 @unregister_tile tile
                 tile.remove()
@@ -242,7 +245,7 @@ class Timer extends Animated
     constructor:({@element, @time_limit, @callback}) ->
         super()
         _.bindAll @
-        @time_limit ?= 60
+        @time_limit ?= 5
         @time_remaining = @time_limit * 1000
         @animate()
 
@@ -289,6 +292,7 @@ class Game
         @element.append """
             <p>Tiles Broken: #{@board.broken_tiles}</p>
             <p>Successful Breaks: #{@board.breaks}</p>
+            <p>Biggest Break: #{@board.biggest_break}</p>
             <p>Max Combo: #{@combo_meter.max_combo}</p>
         """
 

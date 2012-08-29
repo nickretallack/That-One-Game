@@ -140,6 +140,7 @@
       this.tiles = {};
       this.breaks = 0;
       this.broken_tiles = 0;
+      this.biggest_break = 0;
       this.iterate_positions(function(position) {
         var tile;
         tile = _this.make_tile(position);
@@ -243,6 +244,7 @@
         this.combo_meter.bump();
         this.breaks += 1;
         this.broken_tiles += results.length;
+        this.biggest_break = Math.max(this.biggest_break, results.length);
         for (_j = 0, _len1 = results.length; _j < _len1; _j++) {
           tile = results[_j];
           this.unregister_tile(tile);
@@ -404,7 +406,7 @@
       Timer.__super__.constructor.call(this);
       _.bindAll(this);
       if ((_ref = this.time_limit) == null) {
-        this.time_limit = 60;
+        this.time_limit = 5;
       }
       this.time_remaining = this.time_limit * 1000;
       this.animate();
@@ -455,7 +457,7 @@
 
     Game.prototype.end_game = function() {
       this.board.freeze();
-      return this.element.append("<p>Tiles Broken: " + this.board.broken_tiles + "</p>\n<p>Successful Breaks: " + this.board.breaks + "</p>\n<p>Max Combo: " + this.combo_meter.max_combo + "</p>");
+      return this.element.append("<p>Tiles Broken: " + this.board.broken_tiles + "</p>\n<p>Successful Breaks: " + this.board.breaks + "</p>\n<p>Biggest Break: " + this.board.biggest_break + "</p>\n<p>Max Combo: " + this.combo_meter.max_combo + "</p>");
     };
 
     return Game;
