@@ -5,11 +5,12 @@ html {
 
 .tile {
     position:absolute;
-    -webkit-border-radius:50%;
+    background-size:contain;
+    background-position:center center;
+    background-repeat:no-repeat;
 }
-.tile.burger {background:orange;}
-.tile.hotdog {background:red;}
-.tile.pizza {background:yellow;}
+
+
 .board {
     position:relative;
     margin:auto;

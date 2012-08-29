@@ -68,10 +68,10 @@
       this.position = _arg.position, this.board = _arg.board, this.type = _arg.type;
       _.bindAll(this);
       this.element = $("<div class=\"positioned tile " + this.type + "\"></div>");
-      this.element.css({
-        'background-color': this.type
-      });
       this.element.css(V(this.board.tile_size, this.board.tile_size).css_size());
+      this.element.css({
+        'background-image': "url('images/" + this.type + ".png')"
+      });
       this.re_position();
       this.element.on('click', this.clicked);
     }
@@ -126,7 +126,7 @@
         _this = this;
       this.element = _arg.element, this.size = _arg.size, this.combo_meter = _arg.combo_meter, this.minimum_break = _arg.minimum_break, this.tile_size = _arg.tile_size, this.fall_speed = _arg.fall_speed;
       if ((_ref = this.tile_types) == null) {
-        this.tile_types = "red green blue yellow orange".split(' ');
+        this.tile_types = "burger pizza hotdog cookie icecream".split(' ');
       }
       if ((_ref1 = this.size) == null) {
         this.size = V(10, 9);

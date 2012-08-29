@@ -29,8 +29,8 @@ class Tile
     constructor:({@position, @board, @type}) ->
         _.bindAll @
         @element = $ """<div class="positioned tile #{@type}"></div>"""
-        @element.css 'background-color':@type
         @element.css V(@board.tile_size, @board.tile_size).css_size()
+        @element.css 'background-image':"url('images/#{@type}.png')"
         @re_position()
         @element.on 'click', @clicked
 
@@ -60,7 +60,7 @@ class Tile
 
 class Board
     constructor:({@element, @size, @combo_meter, @minimum_break, @tile_size, @fall_speed}) ->
-        @tile_types ?= "red green blue yellow orange".split ' '
+        @tile_types ?= "burger pizza hotdog cookie icecream".split ' '
         @size ?= V 10,9 # number of tiles in the board
         @tile_size = 40
         @minimum_break ?= 3
