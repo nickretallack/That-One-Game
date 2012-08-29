@@ -406,23 +406,32 @@
   Game = (function() {
 
     function Game(_arg) {
-      var template;
-      this.element = _arg.element;
+      var template, _ref, _ref1, _ref2;
+      this.element = _arg.element, this.size = _arg.size, this.time_limit = _arg.time_limit, this.drain_rate = _arg.drain_rate;
       _.bindAll(this);
+      if ((_ref = this.time_limit) == null) {
+        this.time_limit = 60;
+      }
+      if ((_ref1 = this.size) == null) {
+        this.size = V(10, 9);
+      }
+      if ((_ref2 = this.drain_rate) == null) {
+        this.drain_rate = 100.0 / 1000;
+      }
       template = "<div id=\"timer\" class=\"timer\"></div>\n<div id=\"combo-meter\" class=\"meter\">\n    <div class=\"filling\"></div>\n    <div class=\"display\"></div>\n</div>\n<div id=\"board\" class=\"board\"></div>";
       this.element.html(template);
       this.timer = new Timer({
         element: this.element.find('#timer'),
-        time_limit: 60,
+        time_limit: this.time_limit,
         callback: this.end_game
       });
       this.combo_meter = new Meter({
         element: this.element.find('#combo-meter'),
-        drain_rate: 100.0 / 1000
+        drain_rate: this.drain_rate
       });
       this.board = new Board({
         element: this.element.find('#board'),
-        size: V(10, 9),
+        size: this.size,
         combo_meter: this.combo_meter
       });
     }

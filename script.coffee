@@ -245,8 +245,14 @@ class Timer extends Animated
             webkitRequestAnimationFrame @animate
 
 class Game
-    constructor: ({@element}) ->
+    constructor: ({@element, @size, @time_limit, @drain_rate}) ->
         _.bindAll @
+
+        # Default settings
+        @time_limit ?= 60
+        @size ?= V 10,9 # number of tiles in the board
+        @drain_rate ?= 100.0/1000 # how fast combos have to be
+
         template = """
             <div id="timer" class="timer"></div>
             <div id="combo-meter" class="meter">
@@ -258,14 +264,14 @@ class Game
         @element.html template
         @timer = new Timer
             element:@element.find '#timer'
-            time_limit:60
+            time_limit:@time_limit
             callback:@end_game
         @combo_meter = new Meter
             element:@element.find '#combo-meter'
-            drain_rate:100.0/1000
+            drain_rate:@drain_rate
         @board = new Board
             element:@element.find '#board'
-            size:V 10,9
+            size:@size
             combo_meter:@combo_meter
 
     end_game: ->
