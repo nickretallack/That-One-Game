@@ -52,7 +52,7 @@
 
   tile_size = 40;
 
-  tile_types = "burger hotdog pizza".split(' ');
+  tile_types = "red green blue yellow orange".split(' ');
 
   fall_speed = 0.1;
 
@@ -69,7 +69,7 @@
       _.bindAll(this);
       this.element = $("<div class=\"positioned tile " + this.type + "\"></div>");
       this.element.css({
-        position: 'absolute'
+        'background-color': this.type
       });
       this.element.css(V(tile_size, tile_size).css_size());
       this.re_position();

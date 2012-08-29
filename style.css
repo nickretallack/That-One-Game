@@ -1,7 +1,7 @@
-.positioned {
+.tile {
     position:absolute;
+    -webkit-border-radius:50%;
 }
-
 .tile.burger {background:orange;}
 .tile.hotdog {background:red;}
 .tile.pizza {background:yellow;}

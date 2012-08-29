@@ -20,7 +20,8 @@ cardinals =
     down:V(0,-1)
 
 tile_size = 40
-tile_types = "burger hotdog pizza".split ' '
+tile_types = "red green blue yellow orange".split ' '
+#tile_types = "burger hotdog pizza icecream banana ".split ' '
 fall_speed = 0.1
 
 random_choice = (choices) ->
@@ -31,7 +32,7 @@ class Tile
     constructor:({@position, @board, @type}) ->
         _.bindAll @
         @element = $ """<div class="positioned tile #{@type}"></div>"""
-        @element.css position:'absolute'
+        @element.css 'background-color':@type
         @element.css V(tile_size, tile_size).css_size()
         @re_position()
         @element.on 'click', @clicked
