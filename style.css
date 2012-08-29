@@ -2,7 +2,11 @@
     position:absolute;
 }
 
-.tile {background:blue;}
+.tile.burger {background:orange;}
+.tile.hotdog {background:red;}
+.tile.pizza {background:yellow;}
+
+
 
 #game {
     position:relative;

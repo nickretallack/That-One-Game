@@ -3,16 +3,22 @@ tile_count =
     x:10
     y:9
 
-tile_types = "burger hotdog pizza"
+tile_types = "burger hotdog pizza".split ' '
+
+random_choice = (choices) ->
+    index = Math.floor(Math.random() * choices.length) % choices.length
+    choices[index]
 
 class Tile
     constructor:({@position, @board, @type}) ->
+        _.bindAll @
         @element = $ """<div class="positioned tile #{@type}"></div>"""
         @element.css
             position:'absolute'
             width:"#{tile_size}px"
             height:"#{tile_size}px"
         @re_position()
+        @element.on 'click', @clicked
 
     re_position: ->
         @element.css
@@ -20,6 +26,8 @@ class Tile
             bottom:@position.y * tile_size
 
     position_key: -> "#{@position.x}-#{@position.y}"
+
+    clicked: ->
 
 class Board
     constructor:({@element}) ->
@@ -34,7 +42,7 @@ class Board
                         x:x
                         y:y
                     board:@
-                    type:'burger'
+                    type:random_choice tile_types
                 @register_tile tile
                 @element.append tile.element
 
