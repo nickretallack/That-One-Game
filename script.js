@@ -457,7 +457,7 @@
 
     Game.prototype.end_game = function() {
       this.board.freeze();
-      return this.element.append("<p>Tiles Broken: " + this.board.broken_tiles + "</p>\n<p>Successful Breaks: " + this.board.breaks + "</p>\n<p>Biggest Break: " + this.board.biggest_break + "</p>\n<p>Max Combo: " + this.combo_meter.max_combo + "</p>");
+      return this.element.append("<p>Portions Eaten: " + this.board.broken_tiles + "</p>\n<p>Bites: " + this.board.breaks + "</p>\n<p>Biggest Bite: " + this.board.biggest_break + "</p>\n<p>Max Combo: " + this.combo_meter.max_combo + "</p>");
     };
 
     return Game;

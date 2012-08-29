@@ -290,9 +290,9 @@ class Game
     end_game: ->
         @board.freeze()
         @element.append """
-            <p>Tiles Broken: #{@board.broken_tiles}</p>
-            <p>Successful Breaks: #{@board.breaks}</p>
-            <p>Biggest Break: #{@board.biggest_break}</p>
+            <p>Portions Eaten: #{@board.broken_tiles}</p>
+            <p>Bites: #{@board.breaks}</p>
+            <p>Biggest Bite: #{@board.biggest_break}</p>
             <p>Max Combo: #{@combo_meter.max_combo}</p>
         """
 
