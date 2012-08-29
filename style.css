@@ -1,0 +1,10 @@
+.positioned {
+    position:absolute;
+}
+
+.tile {background:blue;}
+
+#game {
+    position:relative;
+    margin:auto;
+}
