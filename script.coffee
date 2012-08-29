@@ -55,7 +55,7 @@ class Tile
         @board.find_contiguous @
 
 class Board
-    constructor:({@element, @size}) ->
+    constructor:({@element, @size, @combo_meter}) ->
         @element.css @size.scale(tile_size).css_size()
         @tiles = {}
         @iterate_positions (position) =>
@@ -106,6 +106,7 @@ class Board
                         work_queue.push found_tile
         results = _.values collected
         if results.length >= 3
+            @combo_meter.bump()
             for tile in results
                 @unregister_tile tile
                 tile.remove()
@@ -157,8 +158,39 @@ class Board
         for x in [0...@size.x]
             @fall_column x
 
+get_time = -> new Date().getTime()
+
+class Meter
+    constructor: ({@element, @bumps, @drain_rate}) ->
+        _.bindAll @
+        @filling = @element.find '.filling'
+        @fullness = 0
+        @bump_strength = 100.0 / @bumps
+        @time = get_time()
+        @drain_some()
+
+    render: ->
+        @filling.css
+            width:"#{@fullness}%"
+
+    bump: ->
+        @fullness += @bump_strength
+        @render()
+
+    drain_some: ->
+        time = get_time()
+        delta = time - @time
+        @time = time
+        @fullness = Math.max @fullness - @drain_rate * delta, 0
+        @render()
+        webkitRequestAnimationFrame @drain_some
 
 $ ->
+    combo_meter = new Meter
+        element:$ '#combo-meter'
+        bumps:5
+        drain_rate:10.0/1000
     new Board
         element:$ '#game'
         size:V 10,9
+        combo_meter:combo_meter
