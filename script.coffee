@@ -1,8 +1,18 @@
-tile_size = 40
-tile_count =
-    x:10
-    y:9
+class Vector
+    constructor:(@x,@y) ->
+    add:(vector) -> V vector.x + @x, vector.y + @y
+    scale:(factor) -> V @x*factor, @y*factor
+    css_position: ->
+        left:@x
+        bottom:@y
+    css_size: ->
+        width:@x
+        height:@y
 
+V = (x,y) -> new Vector x,y
+
+tile_size = 40
+tile_count = V 10,9
 tile_types = "burger hotdog pizza".split ' '
 
 random_choice = (choices) ->
@@ -15,32 +25,26 @@ class Tile
         @element = $ """<div class="positioned tile #{@type}"></div>"""
         @element.css
             position:'absolute'
-            width:"#{tile_size}px"
-            height:"#{tile_size}px"
+        @element.css V(tile_size, tile_size).css_size()
         @re_position()
         @element.on 'click', @clicked
 
     re_position: ->
-        @element.css
-            left:@position.x * tile_size
-            bottom:@position.y * tile_size
+        @element.css @position.scale(tile_size).css_position()
 
     position_key: -> "#{@position.x}-#{@position.y}"
 
     clicked: ->
+        @board.find_contiguous @
 
 class Board
     constructor:({@element}) ->
-        @element.css
-            width:"#{tile_count.x * tile_size}px"
-            height:"#{tile_count.y * tile_size}px"
+        @element.css tile_count.scale(tile_size).css_size()
         @tiles = {}
         for x in [0...tile_count.x]
             for y in [0...tile_count.y]
                 tile = new Tile
-                    position:
-                        x:x
-                        y:y
+                    position:V(x,y)
                     board:@
                     type:random_choice tile_types
                 @register_tile tile
@@ -56,6 +60,13 @@ class Board
         unregister_tile tile
         tile.position = position
         register_tile tile
+
+    find_contiguous: (tile) ->
+        contigious = {}
+        work_queue = [tile]
+        while work_queue.length
+            tile = work_queue.pop()
+
 
 $ ->
     new Board
