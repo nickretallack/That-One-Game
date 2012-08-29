@@ -245,7 +245,7 @@ class Timer extends Animated
     constructor:({@element, @time_limit, @callback}) ->
         super()
         _.bindAll @
-        @time_limit ?= 5
+        @time_limit ?= 60
         @time_remaining = @time_limit * 1000
         @animate()
 

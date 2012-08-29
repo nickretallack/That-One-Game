@@ -406,7 +406,7 @@
       Timer.__super__.constructor.call(this);
       _.bindAll(this);
       if ((_ref = this.time_limit) == null) {
-        this.time_limit = 5;
+        this.time_limit = 60;
       }
       this.time_remaining = this.time_limit * 1000;
       this.animate();
