@@ -205,42 +205,34 @@ class Animated
         @time = time
         delta
 
-class Meter extends Animated
-    constructor: ({@element, @drain_rate, @goal}) ->
-        super()
+class Meter
+    constructor: ({@element, @timeout, @goal}) ->
         _.bindAll @
         @filling = @element.find '.filling'
         @display = @element.find '.display'
 
         @goal ?= 5
-        @drain_rate ?= 100.0/1000 # how fast combos have to be
-
-        @fullness = 0
+        @timeout ?= 1000
         @combo = 0
         @max_combo = 0
-        @animate()
-
-    render: ->
-        @display.text @combo
-        @filling.css
-            width:"#{@fullness}%"
 
     bump: ->
         @combo += 1
         @max_combo = Math.max @max_combo, @combo
-        @fullness = 100
-        @render()
+        @display.text @combo
+        @filling.css
+            '-webkit-transition':'none'
+            width:'100%'
+        setTimeout =>
+            @filling.css
+                '-webkit-transition':"width #{@timeout / 1000}s linear"
+                width:0
+        delay @timeout, =>
+            @combo = 0
+            @display.text @combo
 
     at_goal: ->
         @combo >= @goal
-
-    animate: ->
-        delta = @delta_time()
-        @fullness = Math.max @fullness - @drain_rate * delta, 0
-        if @fullness is 0
-            @combo = 0
-        @render()
-        webkitRequestAnimationFrame @animate
 
 class Timer extends Animated
     constructor:({@element, @time_limit, @callback}) ->
@@ -259,7 +251,7 @@ class Timer extends Animated
             webkitRequestAnimationFrame @animate
 
 class Game
-    constructor: ({@element, @size, @time_limit, @combo_drain_rate, @combo_goal, @minimum_break, @tile_types, @tile_size, @tile_fall_speed}) ->
+    constructor: ({@element, @size, @time_limit, @combo_timeout, @combo_goal, @minimum_break, @tile_types, @tile_size, @tile_fall_speed}) ->
         _.bindAll @
 
         template = """
@@ -277,7 +269,7 @@ class Game
             callback:@end_game
         @combo_meter = new Meter
             element:@element.find '#combo-meter'
-            drain_rate:@combo_drain_rate
+            timeout:@combo_timeout
             goal:@combo_goal
         @board = new Board
             element:@element.find '#board'

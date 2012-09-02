@@ -341,61 +341,52 @@
 
   })();
 
-  Meter = (function(_super) {
-
-    __extends(Meter, _super);
+  Meter = (function() {
 
     function Meter(_arg) {
       var _ref, _ref1;
-      this.element = _arg.element, this.drain_rate = _arg.drain_rate, this.goal = _arg.goal;
-      Meter.__super__.constructor.call(this);
+      this.element = _arg.element, this.timeout = _arg.timeout, this.goal = _arg.goal;
       _.bindAll(this);
       this.filling = this.element.find('.filling');
       this.display = this.element.find('.display');
       if ((_ref = this.goal) == null) {
         this.goal = 5;
       }
-      if ((_ref1 = this.drain_rate) == null) {
-        this.drain_rate = 100.0 / 1000;
+      if ((_ref1 = this.timeout) == null) {
+        this.timeout = 1000;
       }
-      this.fullness = 0;
       this.combo = 0;
       this.max_combo = 0;
-      this.animate();
     }
 
-    Meter.prototype.render = function() {
-      this.display.text(this.combo);
-      return this.filling.css({
-        width: "" + this.fullness + "%"
-      });
-    };
-
     Meter.prototype.bump = function() {
+      var _this = this;
       this.combo += 1;
       this.max_combo = Math.max(this.max_combo, this.combo);
-      this.fullness = 100;
-      return this.render();
+      this.display.text(this.combo);
+      this.filling.css({
+        '-webkit-transition': 'none',
+        width: '100%'
+      });
+      setTimeout(function() {
+        return _this.filling.css({
+          '-webkit-transition': "width " + (_this.timeout / 1000) + "s linear",
+          width: 0
+        });
+      });
+      return delay(this.timeout, function() {
+        _this.combo = 0;
+        return _this.display.text(_this.combo);
+      });
     };
 
     Meter.prototype.at_goal = function() {
       return this.combo >= this.goal;
     };
 
-    Meter.prototype.animate = function() {
-      var delta;
-      delta = this.delta_time();
-      this.fullness = Math.max(this.fullness - this.drain_rate * delta, 0);
-      if (this.fullness === 0) {
-        this.combo = 0;
-      }
-      this.render();
-      return webkitRequestAnimationFrame(this.animate);
-    };
-
     return Meter;
 
-  })(Animated);
+  })();
 
   Timer = (function(_super) {
 
@@ -431,7 +422,7 @@
 
     function Game(_arg) {
       var template;
-      this.element = _arg.element, this.size = _arg.size, this.time_limit = _arg.time_limit, this.combo_drain_rate = _arg.combo_drain_rate, this.combo_goal = _arg.combo_goal, this.minimum_break = _arg.minimum_break, this.tile_types = _arg.tile_types, this.tile_size = _arg.tile_size, this.tile_fall_speed = _arg.tile_fall_speed;
+      this.element = _arg.element, this.size = _arg.size, this.time_limit = _arg.time_limit, this.combo_timeout = _arg.combo_timeout, this.combo_goal = _arg.combo_goal, this.minimum_break = _arg.minimum_break, this.tile_types = _arg.tile_types, this.tile_size = _arg.tile_size, this.tile_fall_speed = _arg.tile_fall_speed;
       _.bindAll(this);
       template = "<div id=\"timer\" class=\"timer\"></div>\n<div id=\"combo-meter\" class=\"meter\">\n    <div class=\"filling\"></div>\n    <div class=\"display\"></div>\n</div>\n<div id=\"board\" class=\"board\"></div>";
       this.element.html(template);
@@ -442,7 +433,7 @@
       });
       this.combo_meter = new Meter({
         element: this.element.find('#combo-meter'),
-        drain_rate: this.combo_drain_rate,
+        timeout: this.combo_timeout,
         goal: this.combo_goal
       });
       this.board = new Board({
