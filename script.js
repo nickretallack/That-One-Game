@@ -368,6 +368,7 @@
 
     Meter.prototype.bump = function() {
       var _this = this;
+      clearTimeout(this.timer);
       this.combo += 1;
       this.max_combo = Math.max(this.max_combo, this.combo);
       this.display.text(this.combo);
@@ -381,7 +382,7 @@
           width: 0
         });
       });
-      return delay(this.timeout, function() {
+      return this.timer = delay(this.timeout, function() {
         _this.combo = 0;
         return _this.display.text(_this.combo);
       });

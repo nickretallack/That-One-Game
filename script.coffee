@@ -224,6 +224,7 @@ class Meter
         @max_combo = 0
 
     bump: ->
+        clearTimeout @timer
         @combo += 1
         @max_combo = Math.max @max_combo, @combo
         @display.text @combo
@@ -234,7 +235,7 @@ class Meter
             @filling.css
                 '-webkit-transition':"width #{@timeout / 1000}s linear"
                 width:0
-        delay @timeout, =>
+        @timer = delay @timeout, =>
             @combo = 0
             @display.text @combo
 
