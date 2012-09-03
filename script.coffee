@@ -130,7 +130,7 @@ class Board
         if results.length >= @minimum_break
             # spread to a bigger explosion if the meter is full
             if @combo_meter.at_goal()
-                for tile in results
+                for current_tile in results
                     for name, vector of cardinals
                         position = current_tile.position.add vector
                         hash_key = position.hash_key()
@@ -231,7 +231,7 @@ class Meter
             @combo = 0
             @display.text @combo
 
-    at_goal: ->
+    at_goal:
         @combo >= @goal
 
 class Timer extends Animated

@@ -229,7 +229,7 @@
       if (results.length >= this.minimum_break) {
         if (this.combo_meter.at_goal()) {
           for (_i = 0, _len = results.length; _i < _len; _i++) {
-            tile = results[_i];
+            current_tile = results[_i];
             for (name in cardinals) {
               vector = cardinals[name];
               position = current_tile.position.add(vector);
@@ -380,9 +380,7 @@
       });
     };
 
-    Meter.prototype.at_goal = function() {
-      return this.combo >= this.goal;
-    };
+    Meter.prototype.at_goal = Meter.combo >= Meter.goal;
 
     return Meter;
 
