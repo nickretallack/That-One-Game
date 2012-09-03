@@ -205,8 +205,26 @@
       return this.register_tile(tile);
     };
 
+    Board.prototype.enlarge_explosion = function(collected) {
+      var found_tile, hash_key, name, position, tile, vector, _i, _len, _ref;
+      _ref = _.values(collected);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        tile = _ref[_i];
+        for (name in cardinals) {
+          vector = cardinals[name];
+          position = tile.position.add(vector);
+          hash_key = position.hash_key();
+          if (!(hash_key in collected) && hash_key in this.tiles) {
+            found_tile = this.tiles[hash_key];
+            collected[hash_key] = found_tile;
+          }
+        }
+      }
+      return collected;
+    };
+
     Board.prototype.find_contiguous = function(start_tile) {
-      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _j, _len, _len1;
+      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len;
       collected = {};
       collected[start_tile.position.hash_key()] = start_tile;
       work_queue = [start_tile];
@@ -228,26 +246,14 @@
       results = _.values(collected);
       if (results.length >= this.minimum_break) {
         if (this.combo_meter.at_goal()) {
-          for (_i = 0, _len = results.length; _i < _len; _i++) {
-            current_tile = results[_i];
-            for (name in cardinals) {
-              vector = cardinals[name];
-              position = current_tile.position.add(vector);
-              hash_key = position.hash_key();
-              if (!(hash_key in collected) && hash_key in this.tiles) {
-                found_tile = this.tiles[hash_key];
-                collected[hash_key] = found_tile;
-              }
-            }
-          }
-          results = _.values(collected);
+          results = _.values(this.enlarge_explosion(collected));
         }
         this.combo_meter.bump();
         this.breaks += 1;
         this.broken_tiles += results.length;
         this.biggest_break = Math.max(this.biggest_break, results.length);
-        for (_j = 0, _len1 = results.length; _j < _len1; _j++) {
-          tile = results[_j];
+        for (_i = 0, _len = results.length; _i < _len; _i++) {
+          tile = results[_i];
           this.unregister_tile(tile);
           tile.remove();
         }
@@ -380,7 +386,9 @@
       });
     };
 
-    Meter.prototype.at_goal = Meter.combo >= Meter.goal;
+    Meter.prototype.at_goal = function() {
+      return this.combo >= this.goal;
+    };
 
     return Meter;
 

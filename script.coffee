@@ -111,6 +111,16 @@ class Board
         tile.move position
         @register_tile tile
 
+    enlarge_explosion: (collected) -> 
+        for tile in _.values collected
+            for name, vector of cardinals
+                position = tile.position.add vector
+                hash_key = position.hash_key()
+                if hash_key not of collected and hash_key of @tiles
+                    found_tile = @tiles[hash_key]
+                    collected[hash_key] = found_tile
+        collected
+
     find_contiguous: (start_tile) ->
         collected = {}
         collected[start_tile.position.hash_key()] = start_tile
@@ -130,14 +140,7 @@ class Board
         if results.length >= @minimum_break
             # spread to a bigger explosion if the meter is full
             if @combo_meter.at_goal()
-                for current_tile in results
-                    for name, vector of cardinals
-                        position = current_tile.position.add vector
-                        hash_key = position.hash_key()
-                        if hash_key not of collected and hash_key of @tiles
-                            found_tile = @tiles[hash_key]
-                            collected[hash_key] = found_tile
-                results = _.values collected
+                results = _.values @enlarge_explosion collected
 
             @combo_meter.bump()
             @breaks += 1
@@ -231,7 +234,7 @@ class Meter
             @combo = 0
             @display.text @combo
 
-    at_goal:
+    at_goal: ->
         @combo >= @goal
 
 class Timer extends Animated
