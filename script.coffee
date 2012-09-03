@@ -36,7 +36,6 @@ class Tile
 
     freeze: ->
         @element.off 'click', @clicked
-        console.log "unbound"
 
     move: (position) ->
         distance = @position.y - position.y
@@ -146,10 +145,15 @@ class Board
             @breaks += 1
             @broken_tiles += results.length
             @biggest_break = Math.max @biggest_break, results.length
+
+            columns_affected = {}
             for tile in results
+                columns_affected[tile.position.x] = true
                 @unregister_tile tile
                 tile.remove()
             @fall()
+            #for x in _.keys columns_affected
+            #    @fall_column x
 
     fall_column: (x) ->
         # Rows are isolated, so we can make them fall one at a time

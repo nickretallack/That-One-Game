@@ -77,8 +77,7 @@
     }
 
     Tile.prototype.freeze = function() {
-      this.element.off('click', this.clicked);
-      return console.log("unbound");
+      return this.element.off('click', this.clicked);
     };
 
     Tile.prototype.move = function(position) {
@@ -224,7 +223,7 @@
     };
 
     Board.prototype.find_contiguous = function(start_tile) {
-      var collected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len;
+      var collected, columns_affected, current_tile, found_tile, hash_key, name, position, results, tile, vector, work_queue, _i, _len;
       collected = {};
       collected[start_tile.position.hash_key()] = start_tile;
       work_queue = [start_tile];
@@ -252,8 +251,10 @@
         this.breaks += 1;
         this.broken_tiles += results.length;
         this.biggest_break = Math.max(this.biggest_break, results.length);
+        columns_affected = {};
         for (_i = 0, _len = results.length; _i < _len; _i++) {
           tile = results[_i];
+          columns_affected[tile.position.x] = true;
           this.unregister_tile(tile);
           tile.remove();
         }
