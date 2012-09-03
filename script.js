@@ -360,7 +360,7 @@
         this.goal = 5;
       }
       if ((_ref1 = this.timeout) == null) {
-        this.timeout = 1000;
+        this.timeout = 1500;
       }
       this.combo = 0;
       this.max_combo = 0;

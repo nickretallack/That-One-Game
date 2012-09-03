@@ -219,7 +219,7 @@ class Meter
         @display = @element.find '.display'
 
         @goal ?= 5
-        @timeout ?= 1000
+        @timeout ?= 1500
         @combo = 0
         @max_combo = 0
 
